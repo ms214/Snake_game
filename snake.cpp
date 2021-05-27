@@ -1,59 +1,75 @@
-#include <ncurses.h>
-#include <clocale>
+#include "snake.h"
 #include <iostream>
+#include <ncurses.h>
 using namespace std;
-//map의 크기는 21*21
 
-int main(){
-  WINDOW *map, *scoreBoard, *mission;
+#define RIGHTAR 77
+#define LEFTAR 75
+#define UPAR 80
+#define DOWNAR 72
 
-  initscr();
-  start_color();
-  resize_term(30, 90);
-  curs_set(0);
+Snake::Snake(): ntail(3){
+  for(int i = 0; i<3; i++){
+    pastTail.push({posHead[0], ntail-i+posHead[0]});
+  }
+}
 
-  init_pair(1, COLOR_WHITE, COLOR_BLACK); //가장 바깥 window border
-  init_pair(2, COLOR_BLUE, COLOR_WHITE);  //내부의 색깔
-  init_pair(3, COLOR_BLACK, COLOR_CYAN);
+void Snake::setMap(int map[][23]){
+  for(int i = 0; i<23; i++)
+    for(int j = 0; j<23; j++)
+      this->mapData[i][j] = map[i][j];
 
-  attron(COLOR_PAIR(1));
-  border('|', '|', '-', '-', '+', '+', '+', '+');
-  attroff(COLOR_PAIR(1));
-  refresh();
+  mapData[posHead[0]][posHead[1]] = 3;
+  for(int i = 0; i<ntail; i++){
+      int trow = pastTail.back().row;
+      int tcol = pastTail.back().col;
+      mapData[trow][tcol] = 4;
+  }
+}
 
-  map = newwin(23, 23, 2, 2);
-  wbkgd(map, COLOR_PAIR(2));
-  wattron(map, COLOR_PAIR(3));
-  wborder(map, '*', '*', '*', '*', '+', '+', '+', '+');
-  wattroff(map, COLOR_PAIR(3));
-  wrefresh(map);
+void Snake::setdir(int a){
+  keypad(stdscr, TRUE);
+  if(a == KEY_UP)
+    dirHead = UP;
+  else if(a ==KEY_RIGHT)
+    dirHead = RIGHT;
+  else if(a == KEY_DOWN)
+    dirHead = DOWN;
+  else if(a == KEY_LEFT)
+    dirHead = LEFT;
+}
 
-  scoreBoard = newwin(10, 15, 2, 40);
-  wbkgd(scoreBoard, COLOR_PAIR(2));
-  wattron(scoreBoard, COLOR_PAIR(2));
-  mvwprintw(scoreBoard, 1, 1, "Score Board");
-  //내용 입력
-  mvwprintw(scoreBoard, 3, 1, "Content"); // "Content"대신 내용 출력
-  wattroff(scoreBoard, COLOR_PAIR(2));
+void Snake::move(){
+  int trow = pastTail.back().row;
+  int tcol = pastTail.back().col;
+  pastTail.pop();
+  pastTail.push({posHead[0], posHead[1]});
+  mapData[posHead[0]][posHead[1]] = 4;
+  mapData[trow][tcol] = 0;
+  switch(dirHead){
+    case UP:
+      posHead[0] --;
+      break;
 
-  wrefresh(scoreBoard);
+    case DOWN:
+      posHead[0] ++;
+      break;
 
-  mission = newwin(10, 15, 15, 40);
-  wbkgd(mission, COLOR_PAIR(2));
-  wattron(mission, COLOR_PAIR(2));
-  mvwprintw(mission, 1, 1, "Mission");
-  //내용
-  mvwprintw(mission, 3, 1, "Content"); // "Content"대신 내용 출력
-  wattroff(mission, COLOR_PAIR(2));
+    case RIGHT:
+      posHead[1] ++;
+      break;
 
-  wrefresh(mission);
+    case LEFT:
+      posHead[1] --;
+      break;
+  }
+  mapData[posHead[0]][posHead[1]] = 3;
+}
 
+int Snake::getMapData(int i, int j){
+  return mapData[i][j];
+}
 
-  getch();
-  delwin(map);
-  delwin(scoreBoard);
-  delwin(mission);
-  endwin();
-
-  return 0;
+bool Snake::die(){
+  return true;
 }
