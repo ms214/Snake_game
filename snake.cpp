@@ -9,8 +9,8 @@ using namespace std;
 #define DOWNAR 72
 
 Snake::Snake(): ntail(3){
-  for(int i = 0; i<3; i++){
-    pastTail.push({posHead[0], ntail-i+posHead[0]});
+  for(int i = 3; i>0; i--){
+    pastTail.push({posHead[0], i+posHead[0]});
   }
 }
 
@@ -21,9 +21,11 @@ void Snake::setMap(int map[][23]){
 
   mapData[posHead[0]][posHead[1]] = 3;
   for(int i = 0; i<ntail; i++){
-      int trow = pastTail.back().row;
-      int tcol = pastTail.back().col;
+      int trow = pastTail.front().row;
+      int tcol = pastTail.front().col;
+      pastTail.pop();
       mapData[trow][tcol] = 4;
+      pastTail.push({trow, tcol});
   }
 }
 
@@ -40,8 +42,8 @@ void Snake::setdir(int a){
 }
 
 void Snake::move(){
-  int trow = pastTail.back().row;
-  int tcol = pastTail.back().col;
+  int trow = pastTail.front().row;
+  int tcol = pastTail.front().col;
   pastTail.pop();
   pastTail.push({posHead[0], posHead[1]});
   mapData[posHead[0]][posHead[1]] = 4;
