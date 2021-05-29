@@ -1,6 +1,8 @@
 #include "snake.h"
 #include <iostream>
 #include <ncurses.h>
+#include <cstdlib>
+#include <ctime>
 using namespace std;
 
 #define RIGHTAR 77
@@ -8,8 +10,8 @@ using namespace std;
 #define UPAR 80
 #define DOWNAR 72
 
-Snake::Snake(): ntail(3){
-  for(int i = 3; i>0; i--){
+Snake::Snake(): ntail(2){
+  for(int i = ntail; i>0; i--){
     pastTail.push({posHead[0], i+posHead[0]});
   }
 }
@@ -31,6 +33,7 @@ void Snake::setMap(int map[][23]){
 
 void Snake::setdir(int a){
   keypad(stdscr, TRUE);
+  int p_dirHead = dirHead;
   if(a == KEY_UP)
     dirHead = UP;
   else if(a ==KEY_RIGHT)
@@ -39,6 +42,21 @@ void Snake::setdir(int a){
     dirHead = DOWN;
   else if(a == KEY_LEFT)
     dirHead = LEFT;
+
+  switch(dirHead){
+    case UP:
+      if(p_dirHead == DOWN) isDie = true;
+      break;
+    case DOWN:
+      if(p_dirHead == UP) isDie = true;
+      break;
+    case RIGHT:
+      if(p_dirHead == LEFT) isDie = true;
+      break;
+    case LEFT:
+      if(p_dirHead == RIGHT) isDie = true;
+      break;
+  }
 }
 
 void Snake::move(){
@@ -65,6 +83,7 @@ void Snake::move(){
       posHead[1] --;
       break;
   }
+  if(mapData[posHead[0]][posHead[1]] == 1) isDie = true;
   mapData[posHead[0]][posHead[1]] = 3;
 }
 
@@ -72,6 +91,29 @@ int Snake::getMapData(int i, int j){
   return mapData[i][j];
 }
 
+void Snake::items(){
+  srand(time(NULL));
+
+  mapData[grow][gcol] = (mapData[grow][gcol] == 5)? 0 : mapData[grow][gcol]; //previous growthitem delete
+  mapData[prow][pcol] = (mapData[prow][pcol] == 6)? 0 : mapData[prow][pcol]; //previous poisonitem delete
+  //growthItem
+  grow = 1+rand() % 21;
+  gcol = 1+rand() % 21;
+  while(mapData[grow][gcol] != 0){
+    grow = 1+rand() % 21;
+    gcol = 1+rand() % 21;
+  }
+  mapData[grow][gcol] = 5;
+  //poisonItem
+  prow = 1+rand() % 21;
+  pcol = 1+rand() % 21;
+  while(mapData[prow][pcol] != 0){
+    prow = 1+rand() % 21;
+    pcol = 1+rand() % 21;
+  }
+  mapData[prow][pcol] = 6;
+}
+
 bool Snake::die(){
-  return true;
+  return isDie;
 }

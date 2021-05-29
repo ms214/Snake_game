@@ -10,14 +10,25 @@ using namespace std;
 #include <unistd.h>
 #endif
 
+
+/*wall : 1
+  corner : 2
+  Snake Head : 3
+  Snake Tail : 4
+  Growthitem : 5
+  Poison Item : 6*/
+
 #include "snake.h"
 
 void setInit();
 void refreshMap(int i, int j, int value);
+void fail();
 void endPro();
 
-WINDOW *map, *scoreBoard, *mission;
+WINDOW *map, *scoreBoard, *mission, *failBox;
 int mapData[23][23] = {0, };
+bool isDie = false;
+int cntitem = 10;
 
 int main(){
   setInit();
@@ -26,20 +37,24 @@ int main(){
   nodelay(stdscr, TRUE);
   while(true){
     sleep(1);
+    cntitem++;
     sn.move();
+    isDie = sn.die();
+    if(isDie) break;
+    if(cntitem >= 10){sn.items(); cntitem = 0;}
     for(int i = 0; i<23; i++)
       for(int j = 0; j<23; j++)
         refreshMap(i, j, sn.getMapData(i,j));
     wrefresh(map);
+
     int input = 0;
-
-
     if((input = getch()) == ERR){
       continue;
     }else{
       sn.setdir(input);
     }
   }
+  if(isDie) {fail(); nodelay(stdscr, FALSE);}
 
   endPro();
   return 0;
@@ -72,6 +87,8 @@ void setInit(){
   init_pair(3, COLOR_BLACK, COLOR_CYAN);
   init_pair(4, COLOR_MAGENTA, COLOR_MAGENTA); //head color
   init_pair(5, COLOR_CYAN, COLOR_CYAN); // tail color
+  init_pair(6, COLOR_GREEN, COLOR_GREEN); // growthItem
+  init_pair(7, COLOR_RED, COLOR_RED); // poisonItem
 
   attron(COLOR_PAIR(1));
   border('|', '|', '-', '-', '+', '+', '+', '+');
@@ -127,7 +144,22 @@ void refreshMap(int i, int j, int value){
       wattron(map, COLOR_PAIR(5));
       mvwprintw(map, i, j, "%d",value);
       wattroff(map, COLOR_PAIR(5));
+    }else if(value == 5){ // growthitem
+      wattron(map, COLOR_PAIR(6));
+      mvwprintw(map, i, j, "%d", value);
+      wattroff(map, COLOR_PAIR(6));
+    }else if(value == 6){ // poisonItem
+      wattron(map, COLOR_PAIR(7));
+      mvwprintw(map, i, j, "%d", value);
+      wattroff(map, COLOR_PAIR(7));
     }
+}
+
+void fail(){
+  failBox = newwin(3, 9, 20, 9);
+  wbkgd(failBox, COLOR_PAIR(3));
+  mvwprintw(failBox, 1, 1, "Failed");
+  wrefresh(failBox);
 }
 
 void endPro(){

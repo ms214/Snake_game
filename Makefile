@@ -4,11 +4,11 @@ game: game.o snake.o
 game.o : game.cpp
 	g++ -c game.cpp
 
-snake.o : snake.cpp
+snake.o : snake.cpp snake.h
 	g++ -c snake.cpp
 
 clean:
 	rm *.o
 
-debug: 
+debug:
 	g++ -std=c++11 -g -o dbg game.cpp snake.cpp -lncursesw
