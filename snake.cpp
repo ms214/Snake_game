@@ -84,7 +84,27 @@ void Snake::move(){
       break;
   }
   if(mapData[posHead[0]][posHead[1]] == 1) isDie = true;
+  if(mapData[posHead[0]][posHead[1]] == 5) { //when growth
+    ntail ++;
+    pastTail.push({trow, tcol});
+    for(int i = 0; i<ntail-1; i++){ //queue 재조정
+      int tmprow = pastTail.front().row;
+      int tmpcol = pastTail.front().col;
+      pastTail.pop();
+      pastTail.push({tmprow, tmpcol});
+    }
+    mapData[trow][tcol] = 4; //꼬리 마지막 위치를 다시 꼬리로
+  }
+  if(mapData[posHead[0]][posHead[1]] == 6){ // when poison
+    ntail --;
+    int tmprow = pastTail.front().row;
+    int tmpcol = pastTail.front().col;
+    pastTail.pop();
+    mapData[tmprow][tmpcol] = 0;
+  }
   mapData[posHead[0]][posHead[1]] = 3;
+
+  if(ntail < 2) isDie = true;
 }
 
 int Snake::getMapData(int i, int j){
