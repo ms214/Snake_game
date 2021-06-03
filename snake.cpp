@@ -1,4 +1,5 @@
 #include "snake.h"
+#include "gate.h"
 #include <iostream>
 #include <ncurses.h>
 #include <cstdlib>
@@ -14,6 +15,7 @@ Snake::Snake(): ntail(2){
   for(int i = ntail; i>0; i--){
     pastTail.push({posHead[0], i+posHead[0]});
   }
+  srand(time(NULL));
 }
 
 void Snake::setMap(int map[][23]){
@@ -87,6 +89,7 @@ void Snake::move(){
   if(mapData[posHead[0]][posHead[1]] == 5) { //when growth
     ntail ++;
     pastTail.push({trow, tcol});
+    cnt_growth ++;
     for(int i = 0; i<ntail-1; i++){ //queue 재조정
       int tmprow = pastTail.front().row;
       int tmpcol = pastTail.front().col;
@@ -97,6 +100,7 @@ void Snake::move(){
   }
   if(mapData[posHead[0]][posHead[1]] == 6){ // when poison
     ntail --;
+    cnt_poison ++;
     int tmprow = pastTail.front().row;
     int tmpcol = pastTail.front().col;
     pastTail.pop();
@@ -112,7 +116,6 @@ int Snake::getMapData(int i, int j){
 }
 
 void Snake::items(){
-  srand(time(NULL));
 
   mapData[grow][gcol] = (mapData[grow][gcol] == 5)? 0 : mapData[grow][gcol]; //previous growthitem delete
   mapData[prow][pcol] = (mapData[prow][pcol] == 6)? 0 : mapData[prow][pcol]; //previous poisonitem delete
@@ -132,6 +135,88 @@ void Snake::items(){
     pcol = 1+rand() % 21;
   }
   mapData[prow][pcol] = 6;
+}
+
+void Snake::wallwall(){
+  gate_pos.row1 = rand() % 2;
+  gate_pos.col1 = rand() % 2;
+  gate_pos.row2 = rand() % 2;
+  gate_pos.col2 = rand() % 2;
+
+  if(gate_pos.row1 == 1) gate_pos.row1 = 22;
+  if(gate_pos.col1 == 1) gate_pos.col1 = 22;
+  if(gate_pos.row2 == 1) gate_pos.row2 = 22;
+  if(gate_pos.col2 == 1) gate_pos.col2 = 22;
+
+  if(gate_pos.row1 == 0 || gate_pos.row1 == 22){
+    gate_pos.col1 = rand() % 23;
+    while(gate_pos.row1 == gate_pos.col1) gate_pos.col1 = rand() % 23;
+  }
+  if(gate_pos.col1 == 0 || gate_pos.col1 == 22){
+    gate_pos.row1 = rand() % 23;
+    while(gate_pos.row1 == gate_pos.col1) gate_pos.row1 = rand() % 23;
+  }
+
+  if(gate_pos.row2 == 0 || gate_pos.row2 == 22){
+    gate_pos.col2 = rand() % 23;
+    while(gate_pos.row2 == gate_pos.col2) gate_pos.col2 = rand() % 23;
+  }
+  if(gate_pos.col2 == 0 || gate_pos.col2 == 22){
+    gate_pos.row2 = rand() % 23;
+    while(gate_pos.row2 == gate_pos.col2) gate_pos.row2 = rand() % 23;
+  }
+}
+
+void Snake::wallbox(){
+  gate_pos.row1 = rand() % 2;
+  gate_pos.col1 = rand() % 2;
+  gate_pos.row2 = 2+rand() % 19;
+  gate_pos.col2 = 2+rand() % 19;
+
+  if(gate_pos.row1 == 1) gate_pos.row1 = 22;
+  if(gate_pos.col1 == 1) gate_pos.col1 = 22;
+
+  if(gate_pos.row1 == 0 || gate_pos.row1 == 22){
+    gate_pos.col1 = rand() % 23;
+    while(gate_pos.row1 == gate_pos.col1) gate_pos.col1 = rand() % 23;
+  }
+  if(gate_pos.col1 == 0 || gate_pos.col1 == 22){
+    gate_pos.row1 = rand() % 23;
+    while(gate_pos.row1 == gate_pos.col1) gate_pos.row1 = rand() % 23;
+  }
+
+  while(mapData[gate_pos.row2][gate_pos.col2] != 0){
+    gate_pos.row2 = 2+rand() % 19;
+    gate_pos.col2 = 2+rand() % 19;
+  }
+}
+
+void Snake::wallwall2(){
+  
+}
+
+void Snake::gate(){
+  gate_type = 1;
+  mapData[gate_pos.row1][gate_pos.col1] = gate_pos.p1;
+  mapData[gate_pos.row2][gate_pos.col2] = gate_pos.p2;
+  switch(gate_type){
+    case 0:
+      wallwall();
+    break;
+
+    case 1:
+      wallbox();
+    break;
+
+    case 2:
+      wallwall2();
+    break;
+  }
+
+  gate_pos.p1 = mapData[gate_pos.row1][gate_pos.col1];
+  gate_pos.p2 = mapData[gate_pos.row2][gate_pos.col2];
+  mapData[gate_pos.row1][gate_pos.col1] = 7;
+  mapData[gate_pos.row2][gate_pos.col2] = 7;
 }
 
 bool Snake::die(){

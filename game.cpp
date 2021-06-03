@@ -1,14 +1,10 @@
 #include <ncurses.h>
 #include <iostream>
 #include <cstdlib>
+#include <thread>
 using namespace std;
+using namespace std::chrono;
 //map의 크기는 21*21
-
-#ifdef WIN32
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
 
 
 /*wall : 1
@@ -16,7 +12,8 @@ using namespace std;
   Snake Head : 3
   Snake Tail : 4
   Growthitem : 5
-  Poison Item : 6*/
+  Poison Item : 6
+  Gate : 7*/
 
 #include "snake.h"
 
@@ -29,6 +26,7 @@ WINDOW *map, *scoreBoard, *mission, *failBox;
 int mapData[23][23] = {0, };
 bool isDie = false;
 int cntitem = 10;
+int cntgate = 0;
 
 int main(){
   setInit();
@@ -36,23 +34,24 @@ int main(){
   sn.setMap(mapData);
   nodelay(stdscr, TRUE);
   while(true){
-    sleep(1);
+    this_thread::sleep_for(milliseconds(500));
+    int input = 0;
+    if((input = getch()) != ERR){
+      sn.setdir(input);
+    }
     cntitem++;
+    cntgate++;
     sn.move();
     isDie = sn.die();
     if(isDie) break;
     if(cntitem >= 10){sn.items(); cntitem = 0;}
+    if(cntgate >= 15){
+      sn.gate(); cntgate = 0;
+    }
     for(int i = 0; i<23; i++)
       for(int j = 0; j<23; j++)
         refreshMap(i, j, sn.getMapData(i,j));
     wrefresh(map);
-
-    int input = 0;
-    if((input = getch()) == ERR){
-      continue;
-    }else{
-      sn.setdir(input);
-    }
   }
   if(isDie) {fail(); nodelay(stdscr, FALSE);}
 
@@ -61,7 +60,7 @@ int main(){
 }
 
 void setInit(){
-  //테도리 데이터
+  //테두리 데이터
   mapData[0][0] = 2;
   mapData[22][0] = 2;
   mapData[0][22] = 2;
@@ -83,12 +82,13 @@ void setInit(){
   cbreak();
 
   init_pair(1, COLOR_WHITE, COLOR_BLACK); //가장 바깥 window border
-  init_pair(2, COLOR_BLUE, COLOR_WHITE);  //내부의 색깔
+  init_pair(2, COLOR_WHITE, COLOR_WHITE);  //내부의 색깔
   init_pair(3, COLOR_BLACK, COLOR_CYAN);
   init_pair(4, COLOR_MAGENTA, COLOR_MAGENTA); //head color
   init_pair(5, COLOR_CYAN, COLOR_CYAN); // tail color
   init_pair(6, COLOR_GREEN, COLOR_GREEN); // growthItem
   init_pair(7, COLOR_RED, COLOR_RED); // poisonItem
+  init_pair(8, COLOR_YELLOW, COLOR_YELLOW); //Gate
 
   attron(COLOR_PAIR(1));
   border('|', '|', '-', '-', '+', '+', '+', '+');
@@ -136,6 +136,14 @@ void refreshMap(int i, int j, int value){
       wattron(map, COLOR_PAIR(2));
       mvwprintw(map, i, j, "%d",value);
       wattroff(map, COLOR_PAIR(2));
+    }else if(value == 1){
+      wattron(map, COLOR_PAIR(3));
+      mvwprintw(map, i, j, "*");
+      wattroff(map, COLOR_PAIR(3));
+    }else if(value == 2){
+      wattron(map, COLOR_PAIR(3));
+      mvwprintw(map, i, j, "+");
+      wattroff(map, COLOR_PAIR(3));
     }else if(value == 3){ //head
       wattron(map, COLOR_PAIR(4));
       mvwprintw(map, i, j, "%d",value);
@@ -152,6 +160,10 @@ void refreshMap(int i, int j, int value){
       wattron(map, COLOR_PAIR(7));
       mvwprintw(map, i, j, "%d", value);
       wattroff(map, COLOR_PAIR(7));
+    }else if(value == 7){
+      wattron(map, COLOR_PAIR(8));
+      mvwprintw(map, i, j, "%d", value);
+      wattroff(map, COLOR_PAIR(8));
     }
 }
 

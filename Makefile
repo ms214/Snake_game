@@ -1,5 +1,5 @@
 game: game.o snake.o
-	g++ -std=c++11 -o snake game.o snake.o -lncursesw
+	g++ -std=c++11 -o snake game.o snake.o -lncursesw -lpthread
 
 game.o : game.cpp
 	g++ -c game.cpp
