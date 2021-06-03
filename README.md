@@ -2,7 +2,7 @@
 - - -   
 ### 소스코드 별 기능      
 1. [game.cpp](https://github.com/ms214/Snake_game/blob/master/game.cpp)
-  *
+  * main 
 
 2. [snake.h](https://github.com/ms214/Snake_game/blob/master/snake.h)
   * Snake class 선언   
