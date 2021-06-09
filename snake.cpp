@@ -1,5 +1,4 @@
 #include "snake.h"
-#include "gate.h"
 #include <iostream>
 #include <ncurses.h>
 #include <cstdlib>
@@ -16,6 +15,8 @@ Snake::Snake(): ntail(2){
     pastTail.push({posHead[0], i+posHead[0]});
   }
   srand(time(NULL));
+
+
 }
 
 void Snake::setMap(int map[][23]){
@@ -64,10 +65,12 @@ void Snake::setdir(int a){
 void Snake::move(){
   int trow = pastTail.front().row;
   int tcol = pastTail.front().col;
-  pastTail.pop();
-  pastTail.push({posHead[0], posHead[1]});
-  mapData[posHead[0]][posHead[1]] = 4;
-  mapData[trow][tcol] = 0;
+  if(mapData[posHead[0]][posHead[1]] != 7){
+    pastTail.pop();
+    pastTail.push({posHead[0], posHead[1]});
+    mapData[posHead[0]][posHead[1]] = 4;
+    mapData[trow][tcol] = 0;
+  }
   switch(dirHead){
     case UP:
       posHead[0] --;
@@ -106,8 +109,27 @@ void Snake::move(){
     pastTail.pop();
     mapData[tmprow][tmpcol] = 0;
   }
-  mapData[posHead[0]][posHead[1]] = 3;
+  if(mapData[posHead[0]][posHead[1]] == 7){
+    now_gating = true;
+    gate.inGate(posHead, dirHead, mapData);
+    move();
+    /*if(posHead[0] == gate_pos.row1 && posHead[1] == gate_pos.col1){
+      if(gate_type == 1)
+        if(gate_pos.row2 == 0){
+          dirHead = DOWN;
+          posHead[0] = gate_pos.row2+1;
+          posHead[1] = gate_pos.col2;
+        }else if(gate_pos.row2 == 22){
+          dirHead = UP;
+          posHead[0] = gate_pos.row2-1;
+          posHead[1] = gate_pos.col2;
+        }
 
+    }else if(posHead[0] == gate_pos.row2 && posHead[1] == gate_pos.col2){
+
+    }*/
+  }
+    mapData[posHead[0]][posHead[1]] = 3;
   if(ntail < 2) isDie = true;
 }
 
@@ -115,8 +137,17 @@ int Snake::getMapData(int i, int j){
   return mapData[i][j];
 }
 
-void Snake::items(){
+void Snake::gating(){
+  if(now_gating)
+    cnt_for_gating ++;
+  if(cnt_for_gating > ntail+1){
+    cnt_for_gating = 0;
+    now_gating = false;
+  }
+  cout << cnt_for_gating;
+}
 
+void Snake::items(){
   mapData[grow][gcol] = (mapData[grow][gcol] == 5)? 0 : mapData[grow][gcol]; //previous growthitem delete
   mapData[prow][pcol] = (mapData[prow][pcol] == 6)? 0 : mapData[prow][pcol]; //previous poisonitem delete
   //growthItem
@@ -137,7 +168,7 @@ void Snake::items(){
   mapData[prow][pcol] = 6;
 }
 
-void Snake::wallwall(){
+/*void Snake::wallwall(){
   gate_pos.row1 = rand() % 2;
   gate_pos.col1 = rand() % 2;
   gate_pos.row2 = rand() % 2;
@@ -192,31 +223,12 @@ void Snake::wallbox(){
 }
 
 void Snake::wallwall2(){
-  
-}
 
-void Snake::gate(){
-  gate_type = 1;
-  mapData[gate_pos.row1][gate_pos.col1] = gate_pos.p1;
-  mapData[gate_pos.row2][gate_pos.col2] = gate_pos.p2;
-  switch(gate_type){
-    case 0:
-      wallwall();
-    break;
+}*/
 
-    case 1:
-      wallbox();
-    break;
+void Snake::fgate(){
+  gate.setGate(mapData);
 
-    case 2:
-      wallwall2();
-    break;
-  }
-
-  gate_pos.p1 = mapData[gate_pos.row1][gate_pos.col1];
-  gate_pos.p2 = mapData[gate_pos.row2][gate_pos.col2];
-  mapData[gate_pos.row1][gate_pos.col1] = 7;
-  mapData[gate_pos.row2][gate_pos.col2] = 7;
 }
 
 bool Snake::die(){

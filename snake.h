@@ -7,14 +7,12 @@
 #include <ctime>
 using namespace std;
 
-#define RIGHT 0
-#define LEFT 1
+#include "gate.h"
+
 #define UP 2
 #define DOWN 3
-
-#define WALL_WALL 0 //side wall - side wall
-#define WALL_INBOX 1 //side wall - in box
-#define WALL_WALL2 2 //side wall - in box wall
+#define LEFT 5
+#define RIGHT 7
 
 typedef struct{
   int row;
@@ -35,8 +33,11 @@ class Snake{
   bool isDie = false;
   int grow = 0, gcol = 0, prow = 0, pcol = 0;//growthitem, poisonitem's position
   int cnt_growth = 0, cnt_poison = 0;
-  int gate_type;
-  Gate_Data gate_pos{0,0,0,0,2,2};
+  Gate gate;
+  bool now_gating = false;
+  int cnt_for_gating = 0;
+  //int gate_type;
+  //Gate_Data gate_pos{0,0,0,0,2,2};
 
 public:
   Snake();
@@ -44,14 +45,15 @@ public:
   void setdir(int a);
   void move();
   void items();
-  void gate();
-  void inGate();
+  void fgate();
   bool die();
   void wallwall();
   void wallbox();
   void wallwall2();
 
   int getMapData(int i, int j);
+  bool isGate(){return now_gating;}
+  void gating();
 };
 
 

@@ -29,8 +29,8 @@ int cntitem = 10;
 int cntgate = 0;
 
 int main(){
+  Snake sn;
   setInit();
-  Snake sn{};
   sn.setMap(mapData);
   nodelay(stdscr, TRUE);
   while(true){
@@ -42,16 +42,18 @@ int main(){
     cntitem++;
     cntgate++;
     sn.move();
+    sn.gating();
     isDie = sn.die();
-    if(isDie) break;
     if(cntitem >= 10){sn.items(); cntitem = 0;}
-    if(cntgate >= 15){
-      sn.gate(); cntgate = 0;
+    if(cntgate >= 15 && !sn.isGate()){
+      sn.fgate(); cntgate = 0;
     }
     for(int i = 0; i<23; i++)
       for(int j = 0; j<23; j++)
         refreshMap(i, j, sn.getMapData(i,j));
     wrefresh(map);
+
+    if(isDie) break;
   }
   if(isDie) {fail(); nodelay(stdscr, FALSE);}
 
@@ -81,8 +83,9 @@ void setInit(){
   noecho();
   cbreak();
 
+  init_pair(9, COLOR_BLUE, COLOR_WHITE); // scoreBoard and MissionBoard
   init_pair(1, COLOR_WHITE, COLOR_BLACK); //가장 바깥 window border
-  init_pair(2, COLOR_WHITE, COLOR_WHITE);  //내부의 색깔
+  init_pair(2, COLOR_BLUE, COLOR_WHITE);  //내부의 색깔
   init_pair(3, COLOR_BLACK, COLOR_CYAN);
   init_pair(4, COLOR_MAGENTA, COLOR_MAGENTA); //head color
   init_pair(5, COLOR_CYAN, COLOR_CYAN); // tail color
@@ -111,22 +114,22 @@ void setInit(){
   wrefresh(map);
 
   scoreBoard = newwin(10, 15, 2, 40);
-  wbkgd(scoreBoard, COLOR_PAIR(2));
-  wattron(scoreBoard, COLOR_PAIR(2));
+  wbkgd(scoreBoard, COLOR_PAIR(9));
+  wattron(scoreBoard, COLOR_PAIR(9));
   mvwprintw(scoreBoard, 1, 1, "Score Board");
   //내용 입력
   mvwprintw(scoreBoard, 3, 1, "Content"); // "Content"대신 내용 출력
-  wattroff(scoreBoard, COLOR_PAIR(2));
+  wattroff(scoreBoard, COLOR_PAIR(9));
 
   wrefresh(scoreBoard);
 
   mission = newwin(10, 15, 15, 40);
-  wbkgd(mission, COLOR_PAIR(2));
-  wattron(mission, COLOR_PAIR(2));
+  wbkgd(mission, COLOR_PAIR(9));
+  wattron(mission, COLOR_PAIR(9));
   mvwprintw(mission, 1, 1, "Mission");
   //내용
   mvwprintw(mission, 3, 1, "Content"); // "Content"대신 내용 출력
-  wattroff(mission, COLOR_PAIR(2));
+  wattroff(mission, COLOR_PAIR(9));
 
   wrefresh(mission);
 }
