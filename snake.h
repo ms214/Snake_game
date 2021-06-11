@@ -19,9 +19,9 @@ typedef struct{
   int col;
 }pt; //pastTail
 
-struct Gate_Data{
-  int row1, col1, row2, col2; // gate의 위치
-  int p1, p2; // gate생성 전 맵데이터의 값
+struct Scores{
+  int B, Growth, Poison, G;
+  int max_length;
 };
 
 class Snake{
@@ -36,8 +36,7 @@ class Snake{
   Gate gate;
   bool now_gating = false;
   int cnt_for_gating = 0;
-  //int gate_type;
-  //Gate_Data gate_pos{0,0,0,0,2,2};
+  Scores score{0,0,0,0};
 
 public:
   Snake();
@@ -54,6 +53,7 @@ public:
   int getMapData(int i, int j);
   bool isGate(){return now_gating;}
   void gating();
+  Scores getscore() {return score;}
 };
 
 

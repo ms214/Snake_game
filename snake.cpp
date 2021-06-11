@@ -15,8 +15,8 @@ Snake::Snake(): ntail(2){
     pastTail.push({posHead[0], i+posHead[0]});
   }
   srand(time(NULL));
-
-
+  score.max_length = ntail;
+  score.B = ntail+1 / score.max_length+1;
 }
 
 void Snake::setMap(int map[][23]){
@@ -92,7 +92,7 @@ void Snake::move(){
   if(mapData[posHead[0]][posHead[1]] == 5) { //when growth
     ntail ++;
     pastTail.push({trow, tcol});
-    cnt_growth ++;
+    score.Growth ++;
     for(int i = 0; i<ntail-1; i++){ //queue 재조정
       int tmprow = pastTail.front().row;
       int tmpcol = pastTail.front().col;
@@ -100,10 +100,11 @@ void Snake::move(){
       pastTail.push({tmprow, tmpcol});
     }
     mapData[trow][tcol] = 4; //꼬리 마지막 위치를 다시 꼬리로
+    if(score.max_length < ntail) score.max_length = ntail;
   }
   if(mapData[posHead[0]][posHead[1]] == 6){ // when poison
     ntail --;
-    cnt_poison ++;
+    score.Poison ++;
     int tmprow = pastTail.front().row;
     int tmpcol = pastTail.front().col;
     pastTail.pop();
@@ -111,26 +112,13 @@ void Snake::move(){
   }
   if(mapData[posHead[0]][posHead[1]] == 7){
     now_gating = true;
+    score.G ++;
     gate.inGate(posHead, dirHead, mapData);
     move();
-    /*if(posHead[0] == gate_pos.row1 && posHead[1] == gate_pos.col1){
-      if(gate_type == 1)
-        if(gate_pos.row2 == 0){
-          dirHead = DOWN;
-          posHead[0] = gate_pos.row2+1;
-          posHead[1] = gate_pos.col2;
-        }else if(gate_pos.row2 == 22){
-          dirHead = UP;
-          posHead[0] = gate_pos.row2-1;
-          posHead[1] = gate_pos.col2;
-        }
-
-    }else if(posHead[0] == gate_pos.row2 && posHead[1] == gate_pos.col2){
-
-    }*/
   }
     mapData[posHead[0]][posHead[1]] = 3;
   if(ntail < 2) isDie = true;
+  score.B = ntail+1 / score.max_length+1;
 }
 
 int Snake::getMapData(int i, int j){
@@ -144,7 +132,6 @@ void Snake::gating(){
     cnt_for_gating = 0;
     now_gating = false;
   }
-  cout << cnt_for_gating;
 }
 
 void Snake::items(){
@@ -168,67 +155,8 @@ void Snake::items(){
   mapData[prow][pcol] = 6;
 }
 
-/*void Snake::wallwall(){
-  gate_pos.row1 = rand() % 2;
-  gate_pos.col1 = rand() % 2;
-  gate_pos.row2 = rand() % 2;
-  gate_pos.col2 = rand() % 2;
-
-  if(gate_pos.row1 == 1) gate_pos.row1 = 22;
-  if(gate_pos.col1 == 1) gate_pos.col1 = 22;
-  if(gate_pos.row2 == 1) gate_pos.row2 = 22;
-  if(gate_pos.col2 == 1) gate_pos.col2 = 22;
-
-  if(gate_pos.row1 == 0 || gate_pos.row1 == 22){
-    gate_pos.col1 = rand() % 23;
-    while(gate_pos.row1 == gate_pos.col1) gate_pos.col1 = rand() % 23;
-  }
-  if(gate_pos.col1 == 0 || gate_pos.col1 == 22){
-    gate_pos.row1 = rand() % 23;
-    while(gate_pos.row1 == gate_pos.col1) gate_pos.row1 = rand() % 23;
-  }
-
-  if(gate_pos.row2 == 0 || gate_pos.row2 == 22){
-    gate_pos.col2 = rand() % 23;
-    while(gate_pos.row2 == gate_pos.col2) gate_pos.col2 = rand() % 23;
-  }
-  if(gate_pos.col2 == 0 || gate_pos.col2 == 22){
-    gate_pos.row2 = rand() % 23;
-    while(gate_pos.row2 == gate_pos.col2) gate_pos.row2 = rand() % 23;
-  }
-}
-
-void Snake::wallbox(){
-  gate_pos.row1 = rand() % 2;
-  gate_pos.col1 = rand() % 2;
-  gate_pos.row2 = 2+rand() % 19;
-  gate_pos.col2 = 2+rand() % 19;
-
-  if(gate_pos.row1 == 1) gate_pos.row1 = 22;
-  if(gate_pos.col1 == 1) gate_pos.col1 = 22;
-
-  if(gate_pos.row1 == 0 || gate_pos.row1 == 22){
-    gate_pos.col1 = rand() % 23;
-    while(gate_pos.row1 == gate_pos.col1) gate_pos.col1 = rand() % 23;
-  }
-  if(gate_pos.col1 == 0 || gate_pos.col1 == 22){
-    gate_pos.row1 = rand() % 23;
-    while(gate_pos.row1 == gate_pos.col1) gate_pos.row1 = rand() % 23;
-  }
-
-  while(mapData[gate_pos.row2][gate_pos.col2] != 0){
-    gate_pos.row2 = 2+rand() % 19;
-    gate_pos.col2 = 2+rand() % 19;
-  }
-}
-
-void Snake::wallwall2(){
-
-}*/
-
 void Snake::fgate(){
   gate.setGate(mapData);
-
 }
 
 bool Snake::die(){
