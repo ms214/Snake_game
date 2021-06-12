@@ -8,7 +8,7 @@ Gate::Gate(int row1, int col1, int row2, int col2, int p1, int p2):row1(row1), c
 
 void Gate::inGate(int (*pos), int &dirHead, int (*map)[23]){
   //pos[0], pos[1] == headPos
-  int dirs[4] = {UP, DOWN, LEFT, RIGHT};
+  int dirs[4] = {UP, RIGHT, DOWN, LEFT};
   if(pos[0] == row1 && pos[1] == col1){
     //gate2의 상하좌우 중 비어 있는 공간
     bool g2_UP = map[row2-1][col2] == 0 && row2-1 >= 0;
@@ -39,9 +39,9 @@ void Gate::inGate(int (*pos), int &dirHead, int (*map)[23]){
           int pHead = dirHead;
           while (dirHead != dirs[i]) i++;
           if(muls % dirHead == 0) dirHead = dirHead;
+          else if(muls % dirs[(i+1) % 4] == 0) dirHead = dirs[(i+1) % 4];
           else if(muls % dirs[(i+3) % 4] == 0) dirHead = dirs[(i+3) % 4];
-          else if(muls % dirs[(i+2) % 4] == 0) dirHead = dirs[(i+2) % 4];
-          else dirHead = dirs[(i+1) % 4];
+          else dirHead = dirs[(i+2) % 4];
 
           pos[0] = row2; pos[1] = col2;
         break;
@@ -76,9 +76,9 @@ void Gate::inGate(int (*pos), int &dirHead, int (*map)[23]){
           int i = 0;
           while (dirHead != dirs[i]) i++;
           if(muls % dirHead == 0) dirHead = dirHead;
+          else if(muls % dirs[(i+1) % 4] == 0) dirHead = dirs[(i+1) % 4];
           else if(muls % dirs[(i+3) % 4] == 0) dirHead = dirs[(i+3) % 4];
-          else if(muls % dirs[(i+2) % 4] == 0) dirHead = dirs[(i+2) % 4];
-          else dirHead = dirs[(i+1) % 4];
+          else dirHead = dirs[(i+2) % 4];
 
           pos[0] = row1; pos[1] = col1;
         break;
