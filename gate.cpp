@@ -75,10 +75,10 @@ void Gate::inGate(int (*pos), int &dirHead, int (*map)[23]){
         default: // 세 방향
           int i = 0;
           while (dirHead != dirs[i]) i++;
-          if(muls % dirHead == 0) dirHead = dirHead;
-          else if(muls % dirs[(i+1) % 4] == 0) dirHead = dirs[(i+1) % 4];
-          else if(muls % dirs[(i+3) % 4] == 0) dirHead = dirs[(i+3) % 4];
-          else dirHead = dirs[(i+2) % 4];
+          if(muls % dirHead == 0) dirHead = dirHead; // 이동가능 방향과 현재 이동 방향이 동일
+          else if(muls % dirs[(i+1) % 4] == 0) dirHead = dirs[(i+1) % 4]; //현재 이동 방향의 시계방향
+          else if(muls % dirs[(i+3) % 4] == 0) dirHead = dirs[(i+3) % 4]; // 현재 이동 방향과 반시계 방향
+          else dirHead = dirs[(i+2) % 4];// 현재 이동 방향과 반대 방향
 
           pos[0] = row1; pos[1] = col1;
         break;

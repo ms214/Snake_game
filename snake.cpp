@@ -11,6 +11,7 @@ using namespace std;
 #define DOWNAR 72
 
 Snake::Snake(): ntail(2){
+  //꼬리 위치를 queue에 push (row는 동일 column은 head의 column에 ntail부터 1까지 감소하면서 더한 값 사용)
   for(int i = ntail; i>0; i--){
     pastTail.push({posHead[0], i+posHead[0]});
   }

@@ -3,10 +3,6 @@
 #include <iostream>
 using namespace std;
 
-#define WALL_WALL 0 //side wall - side wall
-#define WALL_INBOX 1 //side wall - in box
-#define WALL_WALL2 2 //side wall - in box wall
-
 #define RIGHT 7
 #define LEFT 5
 #define UP 2
@@ -15,7 +11,6 @@ using namespace std;
 class Gate{
   int row1, col1, row2, col2; //Gate poses
   int p1, p2; //mapData before Gate
-  int gate_type = WALL_WALL;
 
 public:
   Gate(int row1 = 0, int col1 = 0, int row2 = 0, int col2 = 0, int p1 = 2, int p2 = 2);

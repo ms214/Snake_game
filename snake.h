@@ -32,7 +32,6 @@ class Snake{
   queue<pt> pastTail; //past Tail positions
   bool isDie = false;
   int grow = 0, gcol = 0, prow = 0, pcol = 0;//growthitem, poisonitem's position
-  int cnt_growth = 0, cnt_poison = 0;
   Gate gate;
   bool now_gating = false;
   int cnt_for_gating = 0;
