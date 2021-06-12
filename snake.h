@@ -46,9 +46,6 @@ public:
   void items();
   void fgate();
   bool die();
-  void wallwall();
-  void wallbox();
-  void wallwall2();
 
   int getMapData(int i, int j);
   bool isGate(){return now_gating;}

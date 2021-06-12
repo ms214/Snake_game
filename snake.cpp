@@ -16,7 +16,7 @@ Snake::Snake(): ntail(2){
   }
   srand(time(NULL));
   score.max_length = ntail;
-  score.B = ntail+1 / score.max_length+1;
+  score.B = score.max_length;
 }
 
 void Snake::setMap(int map[][23]){
@@ -100,7 +100,6 @@ void Snake::move(){
       pastTail.push({tmprow, tmpcol});
     }
     mapData[trow][tcol] = 4; //꼬리 마지막 위치를 다시 꼬리로
-    if(score.max_length < ntail) score.max_length = ntail;
   }
   if(mapData[posHead[0]][posHead[1]] == 6){ // when poison
     ntail --;
@@ -116,9 +115,10 @@ void Snake::move(){
     gate.inGate(posHead, dirHead, mapData);
     move();
   }
-    mapData[posHead[0]][posHead[1]] = 3;
+  mapData[posHead[0]][posHead[1]] = 3;
   if(ntail < 2) isDie = true;
-  score.B = ntail+1 / score.max_length+1;
+  if(score.max_length < ntail) score.max_length = ntail;
+  score.B = ntail;
 }
 
 int Snake::getMapData(int i, int j){

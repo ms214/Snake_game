@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <iostream>
 #include <cstdlib>
+#include <ctime>
 #include <thread>
 using namespace std;
 using namespace std::chrono;
@@ -18,25 +19,34 @@ using namespace std::chrono;
 #include "snake.h"
 
 void setInit();
+void createMap();
 void refreshMap(int i, int j, int value);
 void refreshScoreBoard(Snake &sn);
 bool refreshMissionBoard(Snake &sn);
 void timer();
 void fail();
+void success();
 void endPro();
 
-WINDOW *map, *scoreBoard, *mission, *failBox;
+struct toMission{
+  int max_length, Growth, Poison, G;
+} mis;
+
+WINDOW *map, *scoreBoard, *mission;
 int mapData[23][23] = {0, };
 bool isDie = false;
 bool isMission = false;
 int t_time = 0;
+int level = 1;
 
 int cntitem = 20;
 int cntgate = 0;
+//mission mis;
 
 int main(){
-  Snake sn;
   setInit();
+  createMap();
+  Snake sn;
   sn.setMap(mapData);
   nodelay(stdscr, TRUE);
   thread t_timer(timer);
@@ -62,10 +72,25 @@ int main(){
     isMission = refreshMissionBoard(sn);
 
     if(isDie) break;
-    if(isMission) break;
+    if(isMission) {
+      success();  //successBox 출력
+      level++;    //다음 단계로
+      createMap();//다음단계 맵
+      isMission = false;
+      sn = {};
+      sn.setMap(mapData);
+      setInit();
+      t_time = 0;
+      t_timer.join();
+      t_timer = thread(timer);
+    }
+    if(level >=4){
+      isMission = true;
+      success();
+      break;
+    }
   }
   if(isDie) {nodelay(stdscr, FALSE); fail();}
-  if(isMission){}
 
   t_timer.join();
   endPro();
@@ -73,18 +98,6 @@ int main(){
 }
 
 void setInit(){
-  //테두리 데이터
-  mapData[0][0] = 2;
-  mapData[22][0] = 2;
-  mapData[0][22] = 2;
-  mapData[22][22] = 2;
-  for(int i = 1; i<22; i++){
-    mapData[0][i] = 1; // 상단
-    mapData[22][i] = 1; //하단
-    mapData[i][0] = 1; // 좌측
-    mapData[i][22] = 1; //우측
-  }
-
   initscr();
   start_color();
   resize_term(30, 90);
@@ -139,6 +152,57 @@ void setInit(){
   //내용
 
   wrefresh(mission);
+
+  srand(time(NULL));
+  //변수 초기화
+  cntitem = 20;
+  cntgate = 0;
+  mis.max_length = 4 + rand() % 7;
+  mis.Growth = 1 + rand() % 10;
+  mis.Poison = 1 + rand() % 10;
+  mis.G = 1 + rand() % 10;
+}
+
+void createMap(){
+    for(int i = 0; i<23; i++)
+      for(int j = 0; j<23; j++)
+        mapData[i][j] = 0;
+    //테두리 데이터
+    mapData[0][0] = 2;
+    mapData[22][0] = 2;
+    mapData[0][22] = 2;
+    mapData[22][22] = 2;
+    for(int i = 1; i<22; i++){
+      mapData[0][i] = 1; // 상단
+      mapData[22][i] = 1; //하단
+      mapData[i][0] = 1; // 좌측
+      mapData[i][22] = 1; //우측
+    }
+    switch(level){
+      case 1:
+        for(int i = 0; i<6; i++){
+          mapData[i+3][11] = 1;
+          mapData[i+14][11] = 1;
+        }
+      break;
+
+      case 2:
+        for(int i = 0; i<6; i++){
+          mapData[11][i+3] = 1;
+          mapData[11][i+14] = 1;
+        }
+      break;
+
+      case 3:
+        for(int i = 0; i<6; i++){
+          mapData[i+3][11] = 1;
+          mapData[i+14][11] = 1;
+          mapData[11][i+3] = 1;
+          mapData[11][i+14] = 1;
+        }
+      break;
+    }
+
 }
 
 void refreshMap(int i, int j, int value){
@@ -180,7 +244,8 @@ void refreshMap(int i, int j, int value){
 void refreshScoreBoard(Snake &sn){
 
   wattron(scoreBoard, COLOR_PAIR(9));
-  mvwprintw(scoreBoard, 3, 1, "B: %d", sn.getscore().B);
+  mvwprintw(scoreBoard, 3, 1, "             ");
+  mvwprintw(scoreBoard, 3, 1, "B: %d / %d", sn.getscore().B+1, sn.getscore().max_length+1);
   mvwprintw(scoreBoard, 4, 1, "+: %d", sn.getscore().Growth);
   mvwprintw(scoreBoard, 5, 1, "-: %d", sn.getscore().Poison);
   mvwprintw(scoreBoard, 6, 1, "G: %d", sn.getscore().G);
@@ -190,21 +255,21 @@ void refreshScoreBoard(Snake &sn){
 }
 
 bool refreshMissionBoard(Snake &sn){
-  bool b_b = sn.getscore().B>=10;
-  bool b_grow = sn.getscore().Growth>=5;
-  bool b_poison = sn.getscore().Poison>=2;
-  bool b_g = sn.getscore().G>=1;
+  bool b_b = sn.getscore().max_length+1>=mis.max_length;
+  bool b_grow = sn.getscore().Growth>=mis.Growth;
+  bool b_poison = sn.getscore().Poison>=mis.Poison;
+  bool b_g = sn.getscore().G>=mis.G;
   wattron(mission, COLOR_PAIR(9));
-  mvwprintw(mission, 3, 1, "B: 10");
+  mvwprintw(mission, 3, 1, "B: %d", mis.max_length);
   mvwprintw(mission, 3, 8, b_b? "(v)" : "( )");
 
-  mvwprintw(mission, 4, 1, "+: 5");
+  mvwprintw(mission, 4, 1, "+: %d", mis.Growth);
   mvwprintw(mission, 4, 8, b_grow? "(v)" : "( )");
 
-  mvwprintw(mission, 5, 1, "-: 2");
+  mvwprintw(mission, 5, 1, "-: %d", mis.Poison);
   mvwprintw(mission, 5, 8, b_poison? "(v)" : "( )");
 
-  mvwprintw(mission, 6, 1, "G: 1");
+  mvwprintw(mission, 6, 1, "G: %d", mis.G);
   mvwprintw(mission, 6, 8, b_g ? "(v)" : "( )");
 
   wattroff(mission, COLOR_PAIR(9));
@@ -214,17 +279,27 @@ bool refreshMissionBoard(Snake &sn){
 }
 
 void timer(){
-  while(!isDie){
+  while(!isDie && !isMission){
     this_thread::sleep_for(milliseconds(1000));
     t_time ++;
   }
 }
 
 void fail(){
-  failBox = newwin(3, 9, 20, 9);
+  WINDOW *failBox = newwin(3, 9, 20, 9);
   wbkgd(failBox, COLOR_PAIR(3));
   mvwprintw(failBox, 1, 1, "Failed");
   wrefresh(failBox);
+}
+
+void success(){
+  WINDOW *successBox = newwin(3, 9, 20, 9);
+  wbkgd(successBox, COLOR_PAIR(3));
+  mvwprintw(successBox, 1, 1, "Success");
+  wrefresh(successBox);
+  nodelay(stdscr, FALSE);
+  getch();
+  nodelay(stdscr, TRUE);
 }
 
 void endPro(){
