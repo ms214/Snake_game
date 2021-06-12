@@ -9,3 +9,9 @@
 
 * [snake.cpp](https://github.com/ms214/Snake_game/blob/master/snake.cpp)
   * Snake class의 구현코드
+
+* [gate.h](https://github.com/ms214/Snake_game/blob/master/gate.h)
+  * Gate class 선언
+
+* [gate.cpp](https://github.com/ms214/Snake_game/blob/master/gate.cpp)
+  * Gate class의 구현 코드
